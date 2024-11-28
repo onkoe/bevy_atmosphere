@@ -3,6 +3,7 @@ struct Nishita {
     ray_origin: vec3<f32>,
     sun_position: vec3<f32>,
     sun_intensity: f32,
+    sun_disc_scale: f32,
     planet_radius: f32,
     atmosphere_radius: f32,
     rayleigh_coefficient: vec3<f32>,
@@ -35,7 +36,7 @@ fn rsi(rd: vec3<f32>, r0: vec3<f32>, sr: f32) -> vec2<f32> {
     }
 }
 
-fn render_nishita(r_full: vec3<f32>, r0: vec3<f32>, p_sun_full: vec3<f32>, i_sun: f32, r_planet: f32, r_atmos: f32, k_rlh: vec3<f32>, k_mie: f32, sh_rlh: f32, sh_mie: f32, g: f32) -> vec3<f32> {
+fn render_nishita(r_full: vec3<f32>, r0: vec3<f32>, p_sun_full: vec3<f32>, i_sun: f32, sun_disc_scale: f32, r_planet: f32, r_atmos: f32, k_rlh: vec3<f32>, k_mie: f32, sh_rlh: f32, sh_mie: f32, g: f32) -> vec3<f32> {
     // Normalize the ray direction and sun position.
     let r = normalize(r_full);
     let p_sun = normalize(p_sun_full);
@@ -119,7 +120,12 @@ fn render_nishita(r_full: vec3<f32>, r0: vec3<f32>, p_sun_full: vec3<f32>, i_sun
     }
 
     // Calculate and return the final color.
-    return i_sun * (p_rlh * k_rlh * total_rlh + p_mie * k_mie * total_mie);
+    if (sun_disc_scale > 0.0) {
+        let sun_disc: f32 = smoothstep(0.0, 1000.0, p_mie) * sun_disc_scale;
+        return i_sun * (sun_disc * total_mie + p_rlh * k_rlh * total_rlh + p_mie * k_mie * total_mie);
+    } else {
+        return i_sun * (p_rlh * k_rlh * total_rlh + p_mie * k_mie * total_mie);
+    }
 }
 
 @group(0) @binding(0)
@@ -163,6 +169,7 @@ fn main(@builtin(global_invocation_id) invocation_id: vec3<u32>, @builtin(num_wo
         nishita.ray_origin,
         nishita.sun_position,
         nishita.sun_intensity,
+        nishita.sun_disc_scale,
         nishita.planet_radius,
         nishita.atmosphere_radius,
         nishita.rayleigh_coefficient,

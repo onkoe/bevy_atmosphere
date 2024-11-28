@@ -23,6 +23,11 @@ pub struct Nishita {
     ///
     /// Controls how intense the sun's brightness is.
     pub sun_intensity: f32,
+    /// Sun Disc Scale (Default: `10.0`).
+    ///
+    /// Controls how intense the sun's visible disc is.
+    /// Set to zero to disable.
+    pub sun_disc_scale: f32,
     /// Planet Radius (Default: `6371e3`).
     ///
     /// Controls the radius of the planet.
@@ -61,6 +66,7 @@ impl Default for Nishita {
             ray_origin: Vec3::new(0.0, 6372e3, 0.0),
             sun_position: Vec3::new(1.0, 1.0, 1.0),
             sun_intensity: 22.0,
+            sun_disc_scale: 10.0,
             planet_radius: 6371e3,
             atmosphere_radius: 6471e3,
             rayleigh_coefficient: Vec3::new(5.5e-6, 13.0e-6, 22.4e-6),
